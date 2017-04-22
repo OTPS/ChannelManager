@@ -12,17 +12,52 @@ const Discord = require("discord.js");
 var discordClient = new Discord.Client();
 var connected = false;
 
+function channelJoin(member, auth) {
+
+    try {
+        var textChannel = member.guild.channels.filter(c => c.type == 'text').find('name', member.voiceChannel.name.toLowerCase().replace(/\W/g, "-"));
+
+        if (textChannel === null || textChannel === undefined || textChannel === "") {
+            broadcast(`channel: ${member.voiceChannel.name.toLowerCase()} not found.`, auth);
+            textChannel = member.guild.createChannel(member.voiceChannel.name.toLowerCase().replace(/\W/g, "-"), "text")
+            textChannel.then(c => {
+                c.overwritePermissions(member.roles.first(), { READ_MESSAGES: false }).catch(console.log)
+            }).catch(err => {
+                broadcast(`there was an error creating a channel\n\n${err}.`, auth);
+            })
+        };
+        textChannel.overwritePermissions(member, { READ_MESSAGES: true }).then(c => {
+            textChannel.sendMessage(`User: ${member} joined`).catch(console.log)
+        }).catch(console.log)
+
+    } catch (error) {
+        broadcast(error, auth)
+    };
+};
+
+function channelLeave(member, auth) {
+
+    try {
+        var textChannel = member.guild.channels.filter(c => c.type == 'text').find('name', member.voiceChannel.name.toLowerCase().replace(/\W/g, "-")).then
+        textChannel.overwritePermissions(member, { READ_MESSAGES: false }).then(c => {
+            textChannel.sendMessage(`User: ${member} left`).catch(console.log)
+        }).catch(console.log)
+    } catch (error) {
+        broadcast(error, auth)
+    };
+};
+
 function handleVoiceStateUpdate(oldMember, newMember, auth) {
 
     if (oldMember.voiceChannel) {
         if (!config["ignoreChannelsVoice"].includes(oldMember.voiceChannel.id)) {
-            if (oldMember.voiceChannel) broadcast(`User: ${oldMember} left: ${oldMember.voiceChannel.name}`, auth);
+            if (oldMember.voiceChannel) channelLeave(oldMember, auth);
         };
     };
 
     if (newMember.voiceChannel) {
         if (!config["ignoreChannelsVoice"].includes(newMember.voiceChannel.id)) {
-            if (newMember.voiceChannel) broadcast(`User: ${newMember} joined: ${newMember.voiceChannel.name}`, auth);
+            if (newMember.voiceChannel) channelJoin(newMember, auth);
         };
     };
 
@@ -40,10 +75,10 @@ function handleMessage(message, auth) {
 
 function broadcast(eventMessage, auth) {
     if (eventMessage == "") return;
-    if (connected) { discordClient.channels.get(auth.logChannel).sendMessage(eventMessage).then(() => { console.log(eventMessage) }).catch(console.log) }
+    if (connected) { discordClient.channels.get(auth.logChannel).sendMessage(`❗ ${eventMessage}`).then(() => { console.log(eventMessage) }).catch(console.log) }
 };
 
-//discordClient.on("debug", (info) => { broadcast(info, auth) });
+//discordClient.on("debug", (info) => { broadcast(info, auth) }); // Enable for spammy debug messages....
 discordClient.on("disconnect", (event) => { broadcast(event, auth) });
 discordClient.on("error", (error) => { broadcast(error, auth) });
 discordClient.on("guildUnavailable", (guild) => { broadcast(guild, auth) });
