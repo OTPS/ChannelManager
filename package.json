@@ -1,0 +1,22 @@
+{
+  "name": "discord-channel-manager",
+  "version": "0.0.1",
+  "description": "TS3 style channel manager for discord build on Disocrd.JS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OTPS/ChannelManager.git"
+  },
+  "author": "Rasakino (SinonDev Team)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OTPS/ChannelManager/issues"
+  },
+  "homepage": "https://github.com/OTPS/ChannelManager#readme",
+  "dependencies": {
+    "discord.js": "^11.0.0"
+  }
+}
